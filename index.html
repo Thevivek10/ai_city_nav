@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<div class="setting-group"></div>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -756,13 +756,13 @@
             let userLocation = {
                 latitude: null,
                 longitude: null,
-                //city: 'delhi'
+                city: 'delhi'
             };
 
             // Settings & preferences object
             const userPreferences = {
                 theme: 'light',
-                // city: 'delhi',
+                city: '',
                 transportation: {
                     walking: true,
                     publicTransit: true,
@@ -961,6 +961,38 @@ I can help you navigate ${indianCities[userPreferences.city].name} and other maj
                 showWeatherForCity(userPreferences.city);
             }
 
+
+
+
+            document.getElementById('current-city').addEventListener('change', function() {
+    if (this.value) {
+        showNearbyPlaces(this.value);
+        showWeatherForCity(this.value);
+        updateEmergencyContacts();
+        savePreferences();
+    }
+});
+
+
+
+
+function detectCity(message) {
+    const cities = Object.keys(indianCities);
+    for (let city of cities) {
+        if (message.toLowerCase().includes(indianCities[city].name.toLowerCase())) {
+            userPreferences.city = city;
+            document.getElementById('current-city').value = city;
+            savePreferences();
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+
+
             // Event listeners
             sendButton.addEventListener('click', sendMessage);
             userInput.addEventListener('keypress', e => {
@@ -1052,9 +1084,20 @@ I can help you navigate ${indianCities[userPreferences.city].name} and other maj
             loadPreferences();
 
             async function sendMessage() {
-                const message = userInput.value.trim();
-                if (!message) return;
-                
+                async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    // Check if user hasn't selected a city yet
+    if (!userPreferences.city) {
+        if (!detectCity(message)) {
+            addUserMessage(message);
+            addBotMessage("Please select your city first from the settings panel (⚙️ icon) or type your city name.");
+            userInput.value = '';
+            return;
+        }
+    }
+}        
                 addUserMessage(message);
                 userInput.value = '';
                 const loadingId = showLoadingIndicator();
